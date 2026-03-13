@@ -80,15 +80,62 @@ function updateHistory(sessionId, role, content) {
 // ============================================================
 // KNOWLEDGE RETRIEVAL — Supabase lookup
 // ============================================================
+const STOP_WORDS = new Set([
+  "i", "me", "my", "we", "our", "you", "your", "it", "its", "he", "she",
+  "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
+  "have", "has", "had", "do", "does", "did", "will", "would", "could",
+  "should", "can", "may", "might", "shall", "to", "of", "in", "for",
+  "on", "with", "at", "by", "from", "as", "into", "about", "between",
+  "after", "before", "above", "below", "and", "but", "or", "not", "no",
+  "if", "then", "so", "what", "which", "who", "how", "when", "where",
+  "this", "that", "these", "those", "all", "any", "each", "some",
+  "give", "tell", "show", "get", "want", "need", "know", "like",
+  "please", "details", "detail", "info", "information", "about",
+]);
+
+function extractKeywords(query) {
+  return query
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .split(/\s+/)
+    .filter(w => w.length > 1 && !STOP_WORDS.has(w));
+}
+
 async function getContext(query) {
+  const keywords = extractKeywords(query);
+  if (!keywords.length) return "";
+
   try {
-    const { data } = await supabase
-      .from("koko_knowledge")
-      .select("content")
-      .textSearch("content", query.split(" ").slice(0, 3).join(" "), { type: "plain" })
-      .limit(3);
-    if (data?.length) {
-      return `\n\nRelevant Koko Atelier information:\n${data.map(d => d.content).join("\n\n")}`;
+    const results = [];
+    // Search for each keyword individually, collect unique matches
+    for (const keyword of keywords.slice(0, 4)) {
+      const { data } = await supabase
+        .from("koko_knowledge")
+        .select("content, chunk_index")
+        .ilike("content", `%${keyword}%`)
+        .limit(3);
+      if (data?.length) results.push(...data);
+    }
+
+    // Deduplicate by chunk_index
+    const seen = new Set();
+    const unique = results.filter(r => {
+      if (seen.has(r.chunk_index)) return false;
+      seen.add(r.chunk_index);
+      return true;
+    });
+
+    // Rank by how many keywords each chunk matches
+    const ranked = unique
+      .map(r => ({
+        ...r,
+        score: keywords.filter(k => r.content.toLowerCase().includes(k)).length,
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+
+    if (ranked.length) {
+      return `\n\nRelevant Koko Atelier information:\n${ranked.map(r => r.content).join("\n\n")}`;
     }
   } catch { /* db not available */ }
   return "";
