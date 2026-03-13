@@ -62,53 +62,6 @@ Keep every reply short, plain text, and direct.`,
 };
 
 // ============================================================
-// KOKO KNOWLEDGE BASE — Hardcoded FAQs
-// These load without needing a DB upload
-// ============================================================
-const KOKO_KNOWLEDGE = `
-COLLECTIONS:
-- Afsaneh '26: Spring/Summer collection inspired by folk tales. Features lawn, cambric fabrics.
-  Price range: PKR 4,500 - 18,000. Available in XS-XXL.
-- Marsa'a Festive '26: Festive/Eid collection. Rich fabrics — karandi, chiffon, organza.
-  Price range: PKR 8,000 - 35,000. Limited quantities.
-- Ready to Wear (RTW): Available year-round. Pret pieces for daily and semi-formal wear.
-
-SIZING GUIDE:
-- XS: Chest 32", Waist 26", Hips 34"
-- S:  Chest 34", Waist 28", Hips 36"
-- M:  Chest 36", Waist 30", Hips 38"
-- L:  Chest 38", Waist 32", Hips 40"
-- XL: Chest 40", Waist 34", Hips 42"
-- XXL: Chest 42", Waist 36", Hips 44"
-- Custom sizing available — add note at checkout or WhatsApp studio
-
-FABRIC CARE:
-- Lawn/Cambric: Machine wash cold, mild detergent, do not bleach
-- Karandi/Khaddar: Dry clean recommended or hand wash cold
-- Chiffon/Organza: Dry clean only, store folded not hung
-- Embroidered pieces: Always dry clean, store in dust bags
-
-SHIPPING:
-- Lahore: 1-2 business days (PKR 150)
-- Other Pakistan cities: 3-5 business days (PKR 250)
-- International (UAE, UK, USA, Canada and more): Ships via DHL or Skynet. No fixed rates — courier quote shared with customer on request via WhatsApp.
-- Free shipping on orders above PKR 10,000 (Pakistan only)
-
-RETURNS & EXCHANGES:
-- 7-day return window from delivery date
-- Items must be unworn, unwashed, tags attached
-- Sale items are final — no returns
-- To initiate: email support or WhatsApp with order number + reason
-- Exchanges subject to availability
-
-PAYMENT:
-- Credit/Debit card (Visa, Mastercard via Shopify)
-- Bank transfer (HBL, MCB — details at checkout)
-- EasyPaisa / JazzCash
-- Cash on Delivery available for select cities (Lahore, Karachi, Islamabad)
-`;
-
-// ============================================================
 // SESSION STORE — In-memory (replace with Supabase for prod)
 // ============================================================
 const sessions = new Map();
@@ -125,42 +78,20 @@ function updateHistory(sessionId, role, content) {
 }
 
 // ============================================================
-// KNOWLEDGE RETRIEVAL — Simple keyword match
-// In production: replace with pgvector embeddings
+// KNOWLEDGE RETRIEVAL — Supabase lookup
 // ============================================================
 async function getContext(query) {
-  const q = query.toLowerCase();
-  const sections = KOKO_KNOWLEDGE.split("\n\n");
-  const keywords = {
-    "COLLECTIONS": ["collection", "afsaneh", "marsa", "festive", "lawn", "range", "price", "fabric"],
-    "SIZING GUIDE": ["size", "sizing", "chest", "waist", "hip", "fit", "measurement", "custom"],
-    "FABRIC CARE": ["wash", "clean", "care", "fabric", "dry clean", "store", "chiffon", "karandi"],
-    "SHIPPING": ["ship", "deliver", "delivery", "days", "international", "lahore", "karachi", "track"],
-    "RETURNS": ["return", "exchange", "refund", "policy", "unworn", "tags", "cancel"],
-    "PAYMENT": ["pay", "payment", "card", "easypaisa", "jazz", "bank", "cod", "cash"],
-  };
-
-  const relevant = [];
-  for (const [section, keys] of Object.entries(keywords)) {
-    if (keys.some(k => q.includes(k))) {
-      const block = sections.find(s => s.startsWith(section));
-      if (block) relevant.push(block);
-    }
-  }
-
-  // Also check uploaded docs in Supabase
   try {
     const { data } = await supabase
       .from("koko_knowledge")
       .select("content")
       .textSearch("content", query.split(" ").slice(0, 3).join(" "), { type: "plain" })
-      .limit(2);
-    if (data?.length) relevant.push(...data.map(d => d.content));
-  } catch { /* no db yet — that's fine */ }
-
-  return relevant.length
-    ? `\n\nRelevant Koko Atelier information:\n${relevant.join("\n\n")}`
-    : "";
+      .limit(3);
+    if (data?.length) {
+      return `\n\nRelevant Koko Atelier information:\n${data.map(d => d.content).join("\n\n")}`;
+    }
+  } catch { /* db not available */ }
+  return "";
 }
 
 // ============================================================

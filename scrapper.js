@@ -183,6 +183,43 @@ Custom sizing available — WhatsApp +92 313 4730467
 
 
 ----------------------------------------------------------------
+FABRIC CARE
+----------------------------------------------------------------
+Lawn/Cambric: Machine wash cold, mild detergent, do not bleach
+Karandi/Khaddar: Dry clean recommended or hand wash cold
+Chiffon/Organza: Dry clean only, store folded not hung
+Embroidered pieces: Always dry clean, store in dust bags
+
+
+----------------------------------------------------------------
+SHIPPING
+----------------------------------------------------------------
+Lahore: 1-2 business days (PKR 150)
+Other Pakistan cities: 3-5 business days (PKR 250)
+International (UAE, UK, USA, Canada and more): Ships via DHL or Skynet. No fixed rates — courier quote shared with customer on request via WhatsApp.
+Free shipping on orders above PKR 10,000 (Pakistan only)
+
+
+----------------------------------------------------------------
+RETURNS & EXCHANGES
+----------------------------------------------------------------
+7-day return window from delivery date
+Items must be unworn, unwashed, tags attached
+Sale items are final — no returns
+To initiate: email support or WhatsApp with order number + reason
+Exchanges subject to availability
+
+
+----------------------------------------------------------------
+PAYMENT
+----------------------------------------------------------------
+Credit/Debit card (Visa, Mastercard via Shopify)
+Bank transfer (HBL, MCB — details at checkout)
+EasyPaisa / JazzCash
+Cash on Delivery available for select cities (Lahore, Karachi, Islamabad)
+
+
+----------------------------------------------------------------
 ALL PRODUCTS
 ----------------------------------------------------------------
 ${allEntries.join("\n\n---\n\n")}
