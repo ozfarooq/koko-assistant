@@ -31,41 +31,25 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 const KOKO_CONFIG = {
   name: "Koko Atelier",
   language: "en-ur", // bilingual support hint
-  systemPrompt: `You are Zara, the AI assistant for Koko Atelier — a premium ethnic fashion brand
-based in Lahore, Pakistan. You assist customers shopping via the Koko Atelier Shopify store.
+  systemPrompt: `You are Zara, the AI assistant for Koko Atelier — a premium ethnic fashion brand based in Lahore, Pakistan.
+
+RESPONSE RULES — FOLLOW STRICTLY:
+- Keep every reply to 2-3 short sentences maximum
+- NEVER use markdown: no **, no ##, no bullet points, no numbered lists
+- Write in plain conversational text only
+- Be warm but concise — like a helpful shop assistant, not a manual
+- If steps are needed, write them naturally in one sentence (e.g. "Just visit the site, find Neel, select Size S and add to cart!")
+- Always end with one helpful follow-up offer if relevant
 
 BRAND VOICE:
-- Warm, elegant, and approachable
-- Reflect the premium nature of the brand
-- Use polite, refined language
-- Occasionally use Urdu terms of endearment where natural (e.g. "jee", "bilkul")
+- Warm, elegant, approachable
+- Occasionally use light Urdu (e.g. "jee", "bilkul")
+- Never use formal headers or structured lists
 
-YOU HELP WITH:
-1. Order status and tracking
-2. Product information (fabrics, collections, availability)
-3. Sizing and measurements guidance
-4. Shipping rates and delivery timelines (Pakistan & international)
-5. Returns and exchange policy
-6. Care instructions for garments
-7. Collection information (Afsaneh '26, Marsa'a Festive '26, etc.)
-8. Custom orders and studio visits
-
-IMPORTANT POLICIES TO KNOW:
-- Orders are processed within 2-3 business days
-- Standard delivery in Pakistan: 3-5 business days
-- International shipping: 7-14 business days
-- Returns accepted within 7 days of delivery (unworn, tags intact)
-- Custom sizing available — customers should WhatsApp the studio directly
-- Payment methods: Bank transfer, EasyPaisa, JazzCash, card via Shopify
-
-ESCALATION:
-- For specific order issues, payment problems, or complaints → ask for their order number
-  and let them know the team will follow up within 24 hours
-- For custom orders → direct to WhatsApp: +92-XXX-XXXXXXX (replace with real number)
-- Never make up product availability, pricing, or order status
-
-Always be helpful, never dismissive. If unsure, say so gracefully and offer to connect
-the customer with the Koko Atelier team.`,
+CONTACT & ESCALATION:
+- Custom sizing or complex order issues → WhatsApp +92 313 4730467
+- Order queries → orders@kokoatelier.com
+- Never make up availability or order status`,
 
   welcomeMessage: "Assalam o Alaikum! 🌸 Welcome to Koko Atelier. I'm Zara, your personal style assistant. How can I help you today?",
   model: "claude-haiku-4-5-20251001", // Haiku = faster + cheaper for customer service
@@ -298,39 +282,52 @@ app.get("/widget.js", (req, res) => {
   let sessionId = null;
 
   const styles = \`
-    #koko-widget * { box-sizing: border-box; font-family: 'Georgia', serif; }
+    #koko-widget * { box-sizing:border-box; font-family:'Helvetica Neue',Arial,sans-serif; margin:0; padding:0; }
     #koko-btn { position:fixed; bottom:24px; right:24px; z-index:9999;
-      background:#2c1810; color:#f5e6d3; border:none; border-radius:50px;
-      padding:14px 22px; cursor:pointer; font-size:14px; letter-spacing:0.5px;
-      box-shadow:0 4px 20px rgba(44,24,16,0.4); transition:transform 0.2s; }
-    #koko-btn:hover { transform:scale(1.05); }
-    #koko-box { position:fixed; bottom:80px; right:24px; z-index:9999;
-      width:340px; height:480px; background:#fffaf6; border-radius:16px;
-      box-shadow:0 8px 40px rgba(0,0,0,0.18); display:flex; flex-direction:column;
-      overflow:hidden; display:none; }
-    #koko-header { background:#2c1810; color:#f5e6d3; padding:16px 18px;
-      font-size:15px; letter-spacing:1px; display:flex; justify-content:space-between; align-items:center; }
-    #koko-close { background:none; border:none; color:#f5e6d3; font-size:18px; cursor:pointer; }
-    #koko-msgs { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px; }
-    .koko-msg { max-width:85%; padding:10px 14px; border-radius:14px; font-size:13px; line-height:1.5; }
-    .koko-user { align-self:flex-end; background:#2c1810; color:#f5e6d3; border-radius:14px 14px 2px 14px; }
-    .koko-bot { align-self:flex-start; background:#f0e6d8; color:#2c1810; border-radius:14px 14px 14px 2px; }
-    .koko-typing { align-self:flex-start; color:#a08060; font-size:12px; font-style:italic; padding:4px 8px; }
-    #koko-footer { padding:10px 12px; border-top:1px solid #e8d8c8; display:flex; gap:8px; background:#fffaf6; }
-    #koko-input { flex:1; padding:9px 12px; border:1px solid #d4b896; border-radius:20px;
-      font-size:13px; background:#fff; color:#2c1810; outline:none; }
-    #koko-send { background:#2c1810; color:#f5e6d3; border:none; border-radius:20px;
-      padding:9px 16px; cursor:pointer; font-size:13px; }
+      background:#1a1208; color:#fff; border:none; border-radius:4px;
+      padding:12px 20px; cursor:pointer; font-size:12px; letter-spacing:2px; text-transform:uppercase;
+      box-shadow:0 2px 16px rgba(0,0,0,0.25); transition:opacity 0.2s; }
+    #koko-btn:hover { opacity:0.85; }
+    #koko-box { position:fixed; bottom:76px; right:24px; z-index:9999;
+      width:360px; height:500px; background:#fff; border-radius:2px;
+      box-shadow:0 4px 32px rgba(0,0,0,0.14); display:none; flex-direction:column; overflow:hidden; }
+    #koko-header { background:#1a1208; color:#fff; padding:16px 20px;
+      display:flex; justify-content:space-between; align-items:center; }
+    #koko-header-title { font-size:11px; letter-spacing:3px; text-transform:uppercase; }
+    #koko-header-sub { font-size:10px; opacity:0.6; letter-spacing:1px; margin-top:2px; }
+    #koko-close { background:none; border:none; color:#fff; font-size:16px; cursor:pointer; opacity:0.7; line-height:1; }
+    #koko-close:hover { opacity:1; }
+    #koko-msgs { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px;
+      background:#fafaf8; }
+    .koko-msg { max-width:82%; padding:10px 14px; font-size:13px; line-height:1.6; }
+    .koko-user { align-self:flex-end; background:#1a1208; color:#fff; border-radius:2px; }
+    .koko-bot { align-self:flex-start; background:#fff; color:#1a1208; border-radius:2px;
+      border:1px solid #e8e4dc; }
+    .koko-typing { align-self:flex-start; color:#999; font-size:11px; letter-spacing:1px;
+      padding:8px 0; text-transform:uppercase; }
+    #koko-footer { padding:12px 16px; border-top:1px solid #e8e4dc; display:flex; gap:8px; background:#fff; }
+    #koko-input { flex:1; padding:10px 14px; border:1px solid #ddd; border-radius:2px;
+      font-size:13px; color:#1a1208; outline:none; background:#fafaf8; }
+    #koko-input:focus { border-color:#1a1208; }
+    #koko-send { background:#1a1208; color:#fff; border:none; border-radius:2px;
+      padding:10px 18px; cursor:pointer; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; }
+    #koko-send:hover { opacity:0.85; }
+    #koko-msgs::-webkit-scrollbar { width:4px; }
+    #koko-msgs::-webkit-scrollbar-track { background:#fafaf8; }
+    #koko-msgs::-webkit-scrollbar-thumb { background:#ddd; border-radius:2px; }
   \`;
 
   const el = document.createElement("div");
   el.id = "koko-widget";
   el.innerHTML = \`
     <style>\${styles}</style>
-    <button id="koko-btn">🌸 Style Assistant</button>
+    <button id="koko-btn">Ask Zara</button>
     <div id="koko-box">
       <div id="koko-header">
-        <span>✦ KOKO ATELIER</span>
+        <div>
+          <div id="koko-header-title">Koko Atelier</div>
+          <div id="koko-header-sub">Style Assistant · Zara</div>
+        </div>
         <button id="koko-close">✕</button>
       </div>
       <div id="koko-msgs"></div>
