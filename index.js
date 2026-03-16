@@ -339,7 +339,7 @@ app.get("/widget.js", (req, res) => {
   input.onkeydown = e => { if (e.key === "Enter") sendMsg(); };
 
   function linkify(str) {
-    return str.replace(/(https?:\\/\\/[^\\s.,!?)]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    return str.replace(/(https?:\\/\\/[^\\s]+?)([.,!?)]?(?=\\s|$))/g, '<a href="$1" target="_blank" rel="noopener">$1</a>$2');
   }
 
   function addMsg(type, text) {
