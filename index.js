@@ -286,6 +286,8 @@ app.get("/widget.js", (req, res) => {
     .koko-user { align-self:flex-end; background:#1a1208; color:#fff; border-radius:2px; }
     .koko-bot { align-self:flex-start; background:#fff; color:#1a1208; border-radius:2px;
       border:1px solid #e8e4dc; }
+    .koko-bot a { color:#1a1208; text-decoration:underline; word-break:break-all; }
+    .koko-bot a:hover { opacity:0.7; }
     .koko-typing { align-self:flex-start; color:#999; font-size:11px; letter-spacing:1px;
       padding:8px 0; text-transform:uppercase; }
     #koko-footer { padding:12px 16px; border-top:1px solid #e8e4dc; display:flex; gap:8px; background:#fff; }
@@ -336,10 +338,18 @@ app.get("/widget.js", (req, res) => {
   send.onclick = sendMsg;
   input.onkeydown = e => { if (e.key === "Enter") sendMsg(); };
 
+  function linkify(str) {
+    return str.replace(/(https?:\\/\\/[^\\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+  }
+
   function addMsg(type, text) {
     const d = document.createElement("div");
     d.className = "koko-msg koko-" + type;
-    d.textContent = text;
+    if (type === "bot") {
+      d.innerHTML = linkify(text.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
+    } else {
+      d.textContent = text;
+    }
     msgs.appendChild(d);
     msgs.scrollTop = msgs.scrollHeight;
     return d;
