@@ -56,7 +56,7 @@ BAD REPLY (never do this):
 
 Keep every reply short, plain text, and direct.`,
 
-  welcomeMessage: "Assalam o Alaikum! 🌸 Welcome to Koko Atelier. I'm Zara, your personal style assistant. How can I help you today?",
+  welcomeMessage: "Welcome to Koko Atelier. I'm Zara, your personal style assistant. How can I help you today?",
   model: "claude-haiku-4-5-20251001",
   maxTokens: 150, // hard cap — forces short replies
 };
